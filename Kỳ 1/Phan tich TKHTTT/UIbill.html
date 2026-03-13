@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh Toán Hóa Đơn</title>
+    <!-- Tải font Inter từ Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Reset cơ bản */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Sử dụng font Inter cho toàn bộ trang */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f7f6; /* Màu nền xám nhạt */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Container chính (sử dụng lại class .form-container) */
+        .form-container {
+            background-color: #ffffff;
+            padding: 2.5rem 3rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 500px; /* Thu hẹp lại cho form thanh toán */
+        }
+
+        /* Tiêu đề form */
+        .form-title {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+
+        /* Tiêu đề của mục */
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 1.25rem;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 8px;
+        }
+        
+        /* Phần chi tiết hóa đơn */
+        .bill-details, .payment-methods {
+            margin-bottom: 2rem;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            font-size: 1rem;
+            color: #555;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .detail-item span {
+            font-weight: 500;
+        }
+
+        .detail-item strong {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.05rem;
+        }
+
+        /* Kiểu đặc biệt cho tổng giá tiền */
+        .detail-item.total {
+            padding-top: 20px;
+            border-top: 1px solid #bdc3c7; /* Đường kẻ đậm hơn cho tổng */
+            border-bottom: none;
+            margin-top: 10px;
+        }
+
+        .detail-item.total span {
+            font-size: 1.1rem;
+            color: #34495e;
+            font-weight: 600;
+        }
+
+        .detail-item.total strong {
+            font-size: 1.75rem; /* Làm giá tiền nổi bật */
+            font-weight: 700;
+            color: #e74c3c; /* Màu đỏ cho giá tiền */
+        }
+
+        /* Kiểu cho lựa chọn phương thức thanh toán */
+        .radio-group {
+            display: flex;
+            align-items: center;
+            padding: 14px;
+            border: 1px solid #bdc3c7;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+
+        .radio-group:hover {
+            background-color: #f9f9f9;
+        }
+
+        .radio-group input[type="radio"] {
+            margin-right: 12px;
+            accent-color: #3498db; /* Hợp màu với nút */
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .radio-group label {
+            font-size: 1rem;
+            color: #34495e;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* Kiểu cho nút submit (sử dụng lại class .submit-button) */
+        .submit-button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(90deg, #27ae60, #2ecc71); /* Gradient màu xanh lá cho thanh toán */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 1rem;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(46, 204, 113, 0.3);
+        }
+
+        .submit-button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <h1 class="form-title">Thanh Toán Hóa Đơn</h1>
+
+        <!-- Thông tin hóa đơn -->
+        <div class="bill-details">
+            <h2 class="section-title">Chi Tiết Thanh Toán</h2>
+            
+            <div class="detail-item">
+                <span>Mã kiện hàng:</span>
+                <strong>PK123456789</strong>
+            </div>
+
+            <div class="detail-item total">
+                <span>Giá vận chuyển:</span>
+                <strong>30,000 VND</strong>
+            </div>
+        </div>
+
+        <!-- Phương thức thanh toán -->
+        <div class="payment-methods">
+            <h2 class="section-title">Phương Thức Thanh Toán</h2>
+            
+            <div class="radio-group">
+                <input type="radio" id="e-wallet" name="payment_method" value="e-wallet" checked>
+                <label for="e-wallet">Ví Điện Tử (Momo, ZaloPay)</label>
+            </div>
+            
+            <div class="radio-group">
+                <input type="radio" id="credit-card" name="payment_method" value="credit-card">
+                <label for="credit-card">Thẻ Tín Dụng / Ghi Nợ</label>
+            </div>
+
+            <div class="radio-group">
+                <input type="radio" id="bank-transfer" name="payment_method" value="bank-transfer">
+                <label for="bank-transfer">Chuyển Khoản Ngân Hàng</label>
+            </div>
+        </div>
+
+        <!-- Nút thanh toán -->
+        <button type="submit" class="submit-button">Xác Nhận Thanh Toán</button>
+    </div>
+
+</body>
+</html>

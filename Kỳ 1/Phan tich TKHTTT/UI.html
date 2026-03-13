@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo Đơn Gửi Hàng Mới</title>
+    <!-- Tải font Inter từ Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Reset cơ bản */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Sử dụng font Inter cho toàn bộ trang */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f7f6; /* Màu nền xám nhạt */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Container chính của form */
+        .form-container {
+            background-color: #ffffff;
+            padding: 2.5rem 3rem;
+            border-radius: 12px; /* Bo góc mềm mại */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 700px;
+        }
+
+        /* Tiêu đề form */
+        .form-title {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+
+        /* Nhóm các trường (gửi, nhận, đơn hàng) */
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 1.25rem;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 8px;
+        }
+
+        /* Lưới 2 cột cho các trường nhập liệu */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* Mặc định 1 cột trên di động */
+            gap: 1.25rem;
+        }
+
+        /* Trên màn hình lớn hơn (tablet trở lên), dùng 2 cột */
+        @media (min-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* Kiểu cho mỗi nhóm input (label + input) */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Trường chiếm toàn bộ chiều rộng (như địa chỉ) */
+        .form-group.full-width {
+            grid-column: 1 / -1; /* Trải dài hết các cột */
+        }
+
+        /* Kiểu cho label */
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #34495e;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        /* Kiểu cho input và textarea */
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #bdc3c7;
+            border-radius: 8px; /* Bo góc cho input */
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: #95a5a6;
+        }
+
+        /* Hiệu ứng khi focus vào input */
+        .form-input:focus,
+        .form-textarea:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            outline: none;
+        }
+
+        /* Kiểu riêng cho textarea */
+        .form-textarea {
+            resize: vertical; /* Cho phép thay đổi chiều cao */
+            min-height: 80px;
+        }
+
+        /* Kiểu cho nút submit */
+        .submit-button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(90deg, #3498db, #2980b9); /* Gradient đẹp */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 1rem;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .submit-button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <h1 class="form-title">Tạo Đơn Gửi Hàng Mới</h1>
+
+        <form action="#" method="POST">
+            
+            <!-- Phần thông tin người gửi -->
+            <fieldset class="form-section">
+                <legend class="section-title">1. Thông Tin Người Gửi</legend>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="sender-name" class="form-label">Họ tên người gửi *</label>
+                        <input type="text" id="sender-name" class="form-input" placeholder="Nguyễn Văn A" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sender-phone" class="form-label">Số điện thoại *</label>
+                        <input type="tel" id="sender-phone" class="form-input" placeholder="0901234567" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="sender-address" class="form-label">Địa chỉ lấy hàng *</label>
+                        <input type="text" id="sender-address" class="form-input" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố" required>
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- Phần thông tin người nhận -->
+            <fieldset class="form-section">
+                <legend class="section-title">2. Thông Tin Người Nhận</legend>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="receiver-name" class="form-label">Họ tên người nhận *</label>
+                        <input type="text" id="receiver-name" class="form-input" placeholder="Trần Thị B" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="receiver-phone" class="form-label">Số điện thoại *</label>
+                        <input type="tel" id="receiver-phone" class="form-input" placeholder="0987654321" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="receiver-address" class="form-label">Địa chỉ giao hàng *</label>
+                        <input type="text" id="receiver-address" class="form-input" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố" required>
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- Phần thông tin đơn hàng -->
+            <fieldset class="form-section">
+                <legend class="section-title">3. Thông Tin Đơn Hàng</legend>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="weight" class="form-label">Cân nặng (kg) *</label>
+                        <input type="number" id="weight" class="form-input" placeholder="Ví dụ: 1.5" step="0.1" min="0" required>
+                    </div>
+                    <!-- <div class="form-group">
+                        <label for="price" class="form-label">Phí vận chuyển (VND) *</label>
+                        <input type="number" id="price" class="form-input" placeholder="Ví dụ: 30000" step="1000" min="0" required>
+                    </div> -->
+                </div>
+            </fieldset>
+
+            <!-- Nút gửi form -->
+            <button type="submit" class="submit-button">Tạo Đơn Hàng</button>
+        </form>
+    </div>
+
+</body>
+</html>

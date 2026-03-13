@@ -1,0 +1,588 @@
+import React, { useState } from 'react';
+import { 
+  Truck, 
+  Package, 
+  Search, 
+  Home, 
+  PlusCircle, 
+  Users, 
+  FileText, 
+  XCircle, 
+  DollarSign, 
+  CheckCircle,
+  Clock,
+  MapPin,
+  Calendar,
+  AlertTriangle,
+  Printer
+} from 'lucide-react';
+
+// --- MOCK DATA ---
+
+const MOCK_VEHICLES = [
+  { id: 'XE01', plate: '29H-123.45', driver: 'Nguyễn Văn A', route: 'Hà Nội - Hải Phòng', time: '08:00', capacity: 5000, currentLoad: 1200 },
+  { id: 'XE02', plate: '29C-999.88', driver: 'Trần Văn B', route: 'Hà Nội - Đà Nẵng', time: '14:00', capacity: 8000, currentLoad: 7500 }, // Sắp đầy
+  { id: 'XE03', plate: '30F-567.89', driver: 'Lê Thị C', route: 'Hà Nội - TP.HCM', time: '20:00', capacity: 10000, currentLoad: 2000 },
+];
+
+const INITIAL_ORDERS = [
+  { id: 'VD001', sender: 'Hoàng Long', phone: '0901234567', status: 'DangVanChuyen', vehicle: '29C-999.88', fee: 150000, paid: true, from: 'Hà Nội', to: 'Đà Nẵng' },
+  { id: 'VD002', sender: 'Minh Tuấn', phone: '0987654321', status: 'ChoXuLy', vehicle: '30F-567.89', fee: 200000, paid: false, from: 'Hà Nội', to: 'TP.HCM' },
+  { id: 'VD003', sender: 'Thu Hà', phone: '0912345678', status: 'DaGiao', vehicle: '29H-123.45', fee: 50000, paid: true, from: 'Hà Nội', to: 'Hải Phòng' },
+];
+
+// --- COMPONENT CHÍNH ---
+
+export default function LogisticsApp() {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [orders, setOrders] = useState(INITIAL_ORDERS);
+  const [notifications, setNotifications] = useState([]);
+
+  // Hàm chuyển tab
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'dashboard': return <DashboardView orders={orders} vehicles={MOCK_VEHICLES} />;
+      case 'create': return <CreateOrderView vehicles={MOCK_VEHICLES} onCreateOrder={handleCreateOrder} />;
+      case 'search': return <SearchManageView orders={orders} onCancel={handleCancelOrder} onPay={handlePayOrder} />;
+      default: return <DashboardView orders={orders} vehicles={MOCK_VEHICLES} />;
+    }
+  };
+
+  // Logic nghiệp vụ
+  const handleCreateOrder = (newOrder) => {
+    setOrders([newOrder, ...orders]);
+    addNotification(`Tạo đơn ${newOrder.id} thành công!`, 'success');
+    setActiveTab('search'); // Chuyển sang trang quản lý để xem đơn vừa tạo
+  };
+
+  const handleCancelOrder = (orderId, reason) => {
+    setOrders(orders.map(o => o.id === orderId ? { ...o, status: 'DaHuy', cancelReason: reason } : o));
+    addNotification(`Đã hủy đơn ${orderId}`, 'error');
+  };
+
+  const handlePayOrder = (orderId) => {
+    setOrders(orders.map(o => o.id === orderId ? { ...o, paid: true } : o));
+    addNotification(`Thanh toán thành công đơn ${orderId}`, 'success');
+  };
+
+  const addNotification = (msg, type) => {
+    const id = Date.now();
+    setNotifications(prev => [...prev, { id, msg, type }]);
+    setTimeout(() => setNotifications(prev => prev.filter(n => n.id !== id)), 3000);
+  };
+
+  return (
+    <div className="flex h-screen bg-gray-100 font-sans text-gray-800">
+      {/* Sidebar */}
+      <aside className="w-64 bg-slate-900 text-white flex flex-col shadow-xl">
+        <div className="p-6 border-b border-slate-700 flex items-center gap-2">
+          <Truck className="w-8 h-8 text-blue-400" />
+          <div>
+            <h1 className="text-xl font-bold">FastShip</h1>
+            <p className="text-xs text-slate-400">Logistics System</p>
+          </div>
+        </div>
+        
+        <nav className="flex-1 p-4 space-y-2">
+          <NavItem icon={<Home size={20}/>} label="Trang chủ" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
+          <NavItem icon={<PlusCircle size={20}/>} label="Tạo vận đơn" active={activeTab === 'create'} onClick={() => setActiveTab('create')} />
+          <NavItem icon={<Search size={20}/>} label="Tra cứu & Xử lý" active={activeTab === 'search'} onClick={() => setActiveTab('search')} />
+          <div className="pt-4 border-t border-slate-700 mt-4">
+            <p className="px-4 text-xs text-slate-500 uppercase font-semibold mb-2">Báo cáo</p>
+            <NavItem icon={<FileText size={20}/>} label="Doanh thu" />
+            <NavItem icon={<Users size={20}/>} label="Nhân viên" />
+          </div>
+        </nav>
+
+        <div className="p-4 border-t border-slate-700">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center font-bold">NV</div>
+            <div>
+              <p className="text-sm font-medium">Lê Văn Nhân Viên</p>
+              <p className="text-xs text-slate-400">Giao dịch viên</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-auto">
+        {/* Header */}
+        <header className="bg-white p-4 shadow-sm flex justify-between items-center sticky top-0 z-10">
+          <h2 className="text-xl font-bold text-slate-800">
+            {activeTab === 'dashboard' && 'Tổng quan hệ thống'}
+            {activeTab === 'create' && 'Tạo đơn hàng mới & Điều phối'}
+            {activeTab === 'search' && 'Tra cứu, Thanh toán & Hủy đơn'}
+          </h2>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-500">{new Date().toLocaleDateString('vi-VN')}</span>
+            <button className="p-2 bg-gray-100 rounded-full hover:bg-gray-200">
+              <Users size={18} />
+            </button>
+          </div>
+        </header>
+
+        <div className="p-6">
+          {renderContent()}
+        </div>
+      </main>
+
+      {/* Toast Notifications */}
+      <div className="fixed bottom-4 right-4 space-y-2 z-50">
+        {notifications.map(n => (
+          <div key={n.id} className={`px-4 py-3 rounded shadow-lg text-white flex items-center gap-2 ${n.type === 'success' ? 'bg-green-600' : 'bg-red-600'}`}>
+            {n.type === 'success' ? <CheckCircle size={18} /> : <AlertTriangle size={18} />}
+            {n.msg}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// --- SUB COMPONENTS ---
+
+const NavItem = ({ icon, label, active, onClick }) => (
+  <button 
+    onClick={onClick}
+    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${active ? 'bg-blue-600 text-white shadow-md' : 'text-slate-300 hover:bg-slate-800'}`}
+  >
+    {icon}
+    <span className="font-medium">{label}</span>
+  </button>
+);
+
+// 1. DASHBOARD VIEW
+const DashboardView = ({ orders, vehicles }) => {
+  const stats = {
+    total: orders.length,
+    revenue: orders.reduce((sum, o) => sum + (o.paid ? o.fee : 0), 0),
+    activeVehicles: vehicles.filter(v => parseInt(v.time.split(':')[0]) > 12).length // Giả lập
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <StatCard title="Tổng đơn hôm nay" value={stats.total} icon={<Package className="text-blue-500" />} color="bg-blue-50" />
+        <StatCard title="Doanh thu thực thu" value={stats.revenue.toLocaleString() + ' đ'} icon={<DollarSign className="text-green-500" />} color="bg-green-50" />
+        <StatCard title="Xe sắp xuất bến" value={stats.activeVehicles} icon={<Truck className="text-orange-500" />} color="bg-orange-50" />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Orders */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="font-bold text-lg mb-4 text-slate-700">Đơn hàng mới nhất</h3>
+          <div className="space-y-3">
+            {orders.slice(0, 5).map(order => (
+              <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-full ${order.status === 'DaGiao' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}`}>
+                    <Package size={16} />
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm">{order.id}</p>
+                    <p className="text-xs text-gray-500">{order.from} ➝ {order.to}</p>
+                  </div>
+                </div>
+                <StatusBadge status={order.status} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Vehicle Schedule */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="font-bold text-lg mb-4 text-slate-700">Lịch xe chạy hôm nay</h3>
+          <div className="space-y-3">
+            {vehicles.map(v => (
+              <div key={v.id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <span className="font-bold text-lg text-slate-800">{v.plate}</span>
+                    <span className="text-xs text-gray-500 ml-2">({v.driver})</span>
+                  </div>
+                  <div className="flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-bold">
+                    <Clock size={12} /> {v.time}
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600 mb-2">{v.route}</p>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className={`h-2 rounded-full ${v.currentLoad / v.capacity > 0.9 ? 'bg-red-500' : 'bg-green-500'}`} 
+                    style={{ width: `${(v.currentLoad / v.capacity) * 100}%` }}
+                  ></div>
+                </div>
+                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <span>Tải: {v.currentLoad}/{v.capacity} kg</span>
+                  <span>{v.currentLoad / v.capacity > 0.9 ? 'Sắp đầy' : 'Còn chỗ'}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// 2. CREATE ORDER VIEW
+const CreateOrderView = ({ vehicles, onCreateOrder }) => {
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({
+    senderName: '', senderPhone: '', senderAddr: '',
+    receiverName: '', receiverPhone: '', receiverAddr: '',
+    weight: '', type: 'Thường',
+    vehicleId: '', fee: 0
+  });
+
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  
+  const calculateFee = () => {
+    // Logic tính phí đơn giản
+    const w = parseFloat(formData.weight) || 0;
+    const base = formData.type === 'Thường' ? 10000 : 20000;
+    return w * base;
+  };
+
+  const handleCreate = () => {
+    const newOrder = {
+      id: `VD${Math.floor(Math.random() * 10000)}`,
+      sender: formData.senderName,
+      phone: formData.senderPhone,
+      from: formData.senderAddr,
+      to: formData.receiverAddr,
+      status: 'ChoXuLy',
+      vehicle: vehicles.find(v => v.id === formData.vehicleId)?.plate || 'Chưa gán',
+      fee: calculateFee(),
+      paid: false
+    };
+    onCreateOrder(newOrder);
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto">
+      {/* Progress Bar */}
+      <div className="flex items-center justify-between mb-8 px-10">
+        <StepIndicator step={1} current={step} label="Thông tin Khách" />
+        <div className={`flex-1 h-1 mx-4 ${step > 1 ? 'bg-blue-500' : 'bg-gray-200'}`}></div>
+        <StepIndicator step={2} current={step} label="Hàng hóa & Phí" />
+        <div className={`flex-1 h-1 mx-4 ${step > 2 ? 'bg-blue-500' : 'bg-gray-200'}`}></div>
+        <StepIndicator step={3} current={step} label="Điều phối xe" />
+      </div>
+
+      <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+        {step === 1 && (
+          <div className="grid grid-cols-2 gap-8 animate-fade-in">
+            <div className="space-y-4">
+              <h3 className="font-bold text-blue-600 flex items-center gap-2"><Users size={18}/> Người gửi</h3>
+              <Input label="Họ tên" name="senderName" value={formData.senderName} onChange={handleChange} />
+              <Input label="Số điện thoại" name="senderPhone" value={formData.senderPhone} onChange={handleChange} />
+              <Input label="Địa chỉ gửi (Kho/Nhà)" name="senderAddr" value={formData.senderAddr} onChange={handleChange} />
+            </div>
+            <div className="space-y-4">
+              <h3 className="font-bold text-green-600 flex items-center gap-2"><MapPin size={18}/> Người nhận</h3>
+              <Input label="Họ tên" name="receiverName" value={formData.receiverName} onChange={handleChange} />
+              <Input label="Số điện thoại" name="receiverPhone" value={formData.receiverPhone} onChange={handleChange} />
+              <Input label="Địa chỉ nhận" name="receiverAddr" value={formData.receiverAddr} onChange={handleChange} />
+            </div>
+            <div className="col-span-2 flex justify-end mt-4">
+              <Button onClick={() => setStep(2)}>Tiếp theo</Button>
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="space-y-6 animate-fade-in">
+            <h3 className="font-bold text-slate-700 flex items-center gap-2"><Package size={18}/> Thông tin kiện hàng</h3>
+            <div className="grid grid-cols-2 gap-6">
+              <Input label="Trọng lượng (kg)" type="number" name="weight" value={formData.weight} onChange={handleChange} />
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-gray-700">Loại hàng</label>
+                <select name="type" value={formData.type} onChange={handleChange} className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                  <option>Thường</option>
+                  <option>Dễ vỡ</option>
+                  <option>Đông lạnh</option>
+                </select>
+              </div>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-lg flex justify-between items-center border border-blue-100">
+              <span className="text-blue-800 font-medium">Cước phí tạm tính:</span>
+              <span className="text-2xl font-bold text-blue-600">{calculateFee().toLocaleString()} đ</span>
+            </div>
+            <div className="flex justify-between mt-4">
+              <Button variant="secondary" onClick={() => setStep(1)}>Quay lại</Button>
+              <Button onClick={() => setStep(3)}>Tiếp: Chọn xe</Button>
+            </div>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="space-y-6 animate-fade-in">
+             <h3 className="font-bold text-slate-700 flex items-center gap-2"><Truck size={18}/> Chọn chuyến xe vận chuyển</h3>
+             <p className="text-sm text-gray-500">Vui lòng chọn xe phù hợp để gán đơn hàng ngay lập tức.</p>
+             
+             <div className="grid grid-cols-1 gap-4 max-h-60 overflow-y-auto">
+               {vehicles.map(v => (
+                 <div 
+                  key={v.id} 
+                  onClick={() => setFormData({ ...formData, vehicleId: v.id })}
+                  className={`border-2 rounded-lg p-4 cursor-pointer flex justify-between items-center transition-all ${formData.vehicleId === v.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}`}
+                 >
+                   <div className="flex items-center gap-4">
+                     <div className="bg-gray-200 p-2 rounded-full"><Truck size={20}/></div>
+                     <div>
+                       <div className="font-bold">{v.plate} <span className="text-xs font-normal text-gray-500">({v.route})</span></div>
+                       <div className="text-xs text-gray-500">Xuất phát: <span className="font-bold text-slate-700">{v.time}</span></div>
+                     </div>
+                   </div>
+                   <div className="text-right">
+                     <div className={`text-sm font-bold ${v.currentLoad/v.capacity > 0.9 ? 'text-red-500' : 'text-green-600'}`}>
+                       {v.capacity - v.currentLoad}kg trống
+                     </div>
+                   </div>
+                 </div>
+               ))}
+             </div>
+
+             <div className="flex justify-between mt-6 pt-4 border-t">
+              <Button variant="secondary" onClick={() => setStep(2)}>Quay lại</Button>
+              <Button onClick={handleCreate} disabled={!formData.vehicleId}>
+                <Printer size={16} className="mr-2"/> Lưu & In Phiếu Gửi
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// 3. SEARCH & MANAGE VIEW
+const SearchManageView = ({ orders, onCancel, onPay }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+
+  const filteredOrders = orders.filter(o => 
+    o.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    o.phone.includes(searchTerm)
+  );
+
+  const handleViewDetails = (order) => setSelectedOrder(order);
+
+  const performCancel = () => {
+    onCancel(selectedOrder.id, cancelReason);
+    setShowCancelModal(false);
+    setCancelReason('');
+    setSelectedOrder({ ...selectedOrder, status: 'DaHuy', cancelReason }); // Update local view
+  };
+
+  return (
+    <div className="flex gap-6 h-[calc(100vh-140px)]">
+      {/* Left: Search & List */}
+      <div className="w-1/3 flex flex-col gap-4">
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex gap-2">
+          <input 
+            type="text" 
+            placeholder="Nhập Mã VĐ hoặc SĐT..." 
+            className="flex-1 outline-none text-sm"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <button className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700"><Search size={18}/></button>
+        </div>
+        
+        <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-100 overflow-y-auto p-2">
+          {filteredOrders.length === 0 ? (
+            <div className="text-center text-gray-400 mt-10">Không tìm thấy đơn hàng</div>
+          ) : (
+            filteredOrders.map(order => (
+              <div 
+                key={order.id} 
+                onClick={() => handleViewDetails(order)}
+                className={`p-3 border-b cursor-pointer hover:bg-blue-50 transition-colors ${selectedOrder?.id === order.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''}`}
+              >
+                <div className="flex justify-between mb-1">
+                  <span className="font-bold text-slate-700">{order.id}</span>
+                  <StatusBadge status={order.status} size="xs" />
+                </div>
+                <div className="text-xs text-gray-500 flex justify-between">
+                  <span>SĐT: {order.phone}</span>
+                  <span>{order.vehicle}</span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Right: Details & Actions */}
+      <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-100 p-8 flex flex-col justify-between">
+        {selectedOrder ? (
+          <>
+            <div className="space-y-6">
+              <div className="flex justify-between items-start border-b pb-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-800">Chi tiết Vận đơn: {selectedOrder.id}</h2>
+                  <p className="text-sm text-gray-500 mt-1">Ngày tạo: 28/11/2025</p>
+                </div>
+                <div className="text-right">
+                   <StatusBadge status={selectedOrder.status} />
+                   <p className="mt-2 text-sm font-medium">{selectedOrder.vehicle}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-8">
+                <div>
+                  <h4 className="font-bold text-gray-700 mb-2 border-b pb-1">Người gửi</h4>
+                  <p className="font-medium text-lg">{selectedOrder.sender}</p>
+                  <p className="text-gray-600">{selectedOrder.phone}</p>
+                  <p className="text-gray-500 text-sm mt-1">{selectedOrder.from}</p>
+                </div>
+                <div>
+                   <h4 className="font-bold text-gray-700 mb-2 border-b pb-1">Người nhận</h4>
+                   <p className="text-gray-600">Nguyễn Văn Nhận (09xxx)</p>
+                   <p className="text-gray-500 text-sm mt-1">{selectedOrder.to}</p>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-lg grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-gray-500 uppercase">Cước phí</p>
+                  <p className="text-xl font-bold text-slate-800">{selectedOrder.fee.toLocaleString()} đ</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase">Trạng thái thanh toán</p>
+                  {selectedOrder.paid ? (
+                    <span className="text-green-600 font-bold flex items-center gap-1"><CheckCircle size={16}/> Đã thanh toán</span>
+                  ) : (
+                    <span className="text-red-500 font-bold flex items-center gap-1"><AlertTriangle size={16}/> Chưa thanh toán</span>
+                  )}
+                </div>
+              </div>
+
+              {selectedOrder.status === 'DaHuy' && (
+                <div className="bg-red-50 text-red-700 p-4 rounded border border-red-200">
+                  <p className="font-bold">Đơn hàng đã bị hủy</p>
+                  <p className="text-sm">Lý do: {selectedOrder.cancelReason}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-4 pt-6 border-t mt-4">
+              {!selectedOrder.paid && selectedOrder.status !== 'DaHuy' && (
+                 <button 
+                  onClick={() => onPay(selectedOrder.id)}
+                  className="flex-1 bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 flex justify-center items-center gap-2"
+                >
+                   <DollarSign /> Xác nhận Thanh toán
+                 </button>
+              )}
+              
+              {selectedOrder.status === 'ChoXuLy' && (
+                 <button 
+                  onClick={() => setShowCancelModal(true)}
+                  className="flex-1 bg-red-100 text-red-600 py-3 rounded-lg font-bold hover:bg-red-200 flex justify-center items-center gap-2"
+                >
+                   <XCircle /> Hủy đơn hàng
+                 </button>
+              )}
+
+              {selectedOrder.status === 'DangVanChuyen' && (
+                 <div className="w-full text-center text-orange-600 bg-orange-50 p-3 rounded font-medium border border-orange-200">
+                   Xe đã xuất phát, không thể hủy đơn hàng này.
+                 </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="h-full flex flex-col items-center justify-center text-gray-400">
+            <Search size={48} className="mb-4 opacity-20"/>
+            <p>Chọn một đơn hàng từ danh sách để xem chi tiết</p>
+          </div>
+        )}
+      </div>
+
+      {/* Cancel Modal */}
+      {showCancelModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in">
+          <div className="bg-white p-6 rounded-lg w-96 shadow-xl">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-red-600"><AlertTriangle/> Xác nhận hủy đơn</h3>
+            <p className="text-sm text-gray-600 mb-4">Bạn có chắc chắn muốn hủy đơn hàng <b>{selectedOrder.id}</b>? Hành động này sẽ gỡ hàng khỏi chuyến xe.</p>
+            <label className="text-sm font-medium">Lý do hủy:</label>
+            <textarea 
+              className="w-full border rounded p-2 mt-1 mb-4 h-24 text-sm" 
+              placeholder="VD: Khách đổi ý, Sai thông tin..."
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+            ></textarea>
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setShowCancelModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Đóng</button>
+              <button onClick={performCancel} disabled={!cancelReason} className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50">Xác nhận Hủy</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// UTILS COMPONENTS
+const StatCard = ({ title, value, icon, color }) => (
+  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
+    <div className={`p-4 rounded-full ${color}`}>{icon}</div>
+    <div>
+      <p className="text-gray-500 text-sm">{title}</p>
+      <p className="text-2xl font-bold text-slate-800">{value}</p>
+    </div>
+  </div>
+);
+
+const StepIndicator = ({ step, current, label }) => (
+  <div className="flex flex-col items-center gap-2 relative">
+    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold transition-all ${current >= step ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
+      {current > step ? <CheckCircle size={16}/> : step}
+    </div>
+    <span className={`text-xs font-medium ${current >= step ? 'text-blue-600' : 'text-gray-400'}`}>{label}</span>
+  </div>
+);
+
+const Input = ({ label, ...props }) => (
+  <div className="space-y-1">
+    <label className="text-sm font-medium text-gray-700">{label}</label>
+    <input className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" {...props} />
+  </div>
+);
+
+const Button = ({ children, variant = 'primary', ...props }) => (
+  <button 
+    className={`px-6 py-2 rounded-lg font-medium transition-colors flex items-center ${variant === 'primary' ? 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`} 
+    {...props}
+  >
+    {children}
+  </button>
+);
+
+const StatusBadge = ({ status, size = 'md' }) => {
+  const styles = {
+    ChoXuLy: 'bg-yellow-100 text-yellow-700',
+    DangVanChuyen: 'bg-blue-100 text-blue-700',
+    DaGiao: 'bg-green-100 text-green-700',
+    DaHuy: 'bg-red-100 text-red-700'
+  };
+  const labels = {
+    ChoXuLy: 'Chờ xử lý',
+    DangVanChuyen: 'Đang vận chuyển',
+    DaGiao: 'Đã giao',
+    DaHuy: 'Đã hủy'
+  };
+  
+  return (
+    <span className={`${styles[status]} ${size === 'xs' ? 'text-[10px] px-1.5 py-0.5' : 'text-xs px-2 py-1'} rounded-full font-bold whitespace-nowrap`}>
+      {labels[status]}
+    </span>
+  );
+};
